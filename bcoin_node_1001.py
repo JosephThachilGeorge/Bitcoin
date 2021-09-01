@@ -5,14 +5,14 @@ from flask import Flask,jsonify,request
 import requests
 from uuid import uuid4
 from urllib.parse import urlparse
-
+# This is the Python class for Blockchain
 class Blockchain:
     def __init__(self):
         self.chain=[]
         self.transactions = []
         self.create_block(proof= 1 , previous_hash='0')
         self.nodes = set()
-
+#Function for creating block
     def create_block(self, proof, previous_hash):
         block={'index' : len(self.chain) + 1,
                 'timestamp' : str(datetime.datetime.now()),
@@ -60,6 +60,8 @@ class Blockchain:
             previous_block=block
             block_index +=1
         return True
+    
+#Function for adding transaction
 
     def add_transaction(self, sender, receiver, amount):
         self.transactions.append({'sender' : sender,
@@ -111,31 +113,39 @@ def mine_block():
                 'previous_hash' : block['previous_hash'],
                 'transactions' : block['transactions']}
     return jsonify(response), 200
-    
+
+#Get method for belockchain 
 @app.route('/get_chain', methods = ['GET'])
 def get_chain():
     response = {'chain' : blockchain.chain,
                 'length' : len(blockchain.chain)}
     return jsonify(response), 200
+
+ #Validate method for belockchain 
     
 @app.route('/is_valid', methods = ['GET'])
 def is_valid():
     is_valid = blockchain.is_chain_valid(blockchain.chain)
     if is_valid:
-        response = {'message': 'All good. The Blockchain is valid.'}
+        response = {'message': 'Everything is fine. The Blockchain is correct.'}
     else:
-        response = {'message': 'We have a problem. The Blockchain is not valid.'}
+        response = {'message': 'We've got an issue. The Blockchain isn't trustworthy..'}
     return jsonify(response), 200
+
+ #POST method for belockchain 
 
 @app.route('/add_transaction', methods = ['POST'])
 def add_transaction():
     json = request.get_json()
     transaction_keys = ['sender', 'receiver', 'amount']
     if not all(key in json for key in transaction_keys):
-        return 'Some elements of the transactions are missing', 400
+        return 'Some transactional components are missing.', 400
     index = blockchain.add_transaction(json['sender'],json['receiver'],json['amount'])
     response = {'message' : f'This transaction will be added to the Block {index}'}
     return jsonify(response), 201
+
+ #Connect to the node
+
 
 @app.route('/connect_node', methods = ['POST'])
 def connect_node():
@@ -145,18 +155,21 @@ def connect_node():
         return 'No node', 400
     for node in nodes:
         blockchain.add_node(node)
-    response = {'message' : 'All the nodes are now connected. The Bcoin blockchain now contains the node',
+    response = {'message' : 'All of the nodes are now linked together. The node has now been added to the Bcoin blockchain',
                 'total_nodes' : list(blockchain.nodes)}
     return jsonify(response), 201
+
+
+ #method for changing mode
 
 @app.route('/replace_chain', methods = ['GET'])
 def replace_chain():
     is_chain_replaced = blockchain.replace_chain()
     if is_chain_replaced:
-        response = {'message': 'The nodes are different so the chain is replaced by the longest chain.',
+        response = {'message': 'Because the nodes are different, the longest chain is used to replace the chain..',
                     'new_chain' : blockchain.chain}
     else:
-        response = {'message': 'All good. The chain is the largest one',
+        response = {'message': 'Everything is fine. The Blockchain is correct. The chain is the longest one',
                     'new_chain' : blockchain.chain}
     return jsonify(response), 200
 
