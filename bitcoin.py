@@ -5,7 +5,6 @@ from flask import Flask,jsonify,request
 import requests
 from uuid import uuid4
 from urllib.parse import urlparse
-
 # Creating a block chain
 class Blockchain:
     def __init__(self):
@@ -18,8 +17,8 @@ class Blockchain:
         # nodes in the network should be unique
         self.nodes = set()
     """   
-    Creating a block with five fields
-    index, timestamp, proof(example used instead of whole block), previous_hash,transactions
+    This class is for method is for creating block with five fields
+    index, timestamp, proof, previous_hash,transactions
     """
     def create_block(self, proof, previous_hash):
         block={'index' : len(self.chain) + 1,
@@ -32,17 +31,19 @@ class Blockchain:
         self.chain.append(block)
         return block
     
-    # Getting the previous block
+    # Getting the old block
     def get_previous_block(self):
         return self.chain[-1]
     
-    # Our proof of work for mining the block
-    # resultant hash should have 4 leading 0s which is the target
+# We have a proof of work for mining the block.
+
+# The goal is to have four leading zeros in the resultant hash.
+
     def proof_of_work(self,previous_proof):
         new_proof = 1
         check_proof = False
         
-        # create a hash and seeing if new_proof**2 - previous_proof**2 has leading 4 0s else increment the proof and check
+        # create a hash and look if new_proof**2 - previous_proof**2 has leading 4 0s else increment the proof and check
         while check_proof is False:
             hash_operation = hashlib.sha256(str(new_proof**2 - previous_proof**2).encode()).hexdigest()
             if hash_operation[:4]=='0000':
@@ -51,9 +52,9 @@ class Blockchain:
                 new_proof +=1
         return new_proof
             
-    # Hashing 
-    # json. dumps() takes in a json object and returns a string.
-    # encode the string to bytes and the hex() method returns a string
+# Hashing 
+# json. dumps() accepts a json object as input and returns a string.
+# The hex() function returns a string after converting the string to bytes.
     def hash(self,block):
         encoded_block = json.dumps(block, sort_keys = True).encode()
         return hashlib.sha256(encoded_block).hexdigest()
@@ -65,7 +66,7 @@ class Blockchain:
         while block_index < len(self.chain):
             block = self.chain[block_index]
             
-            # check if the prev hash in current block does not match with the original hash of the prev block
+            # Check if the previous hash in the current block differs from the preceding block's original hash.
             if block['previous_hash'] != self.hash(previous_block):
                 return False
             
@@ -82,7 +83,7 @@ class Blockchain:
         return True
 
     # add transactions
-    # we will give it as a json format in postman in post request for demo
+    # We'll send it to Postman in json format as a sample request.
     def add_transaction(self, sender, receiver, amount):
         self.transactions.append({'sender' : sender,
                            'receiver' : receiver,
@@ -93,8 +94,8 @@ class Blockchain:
     
     # adding the node
     def add_node(self,address):
-        # parsed_url = urlparse('http://127.0.0.1:5000/')
-        # parsed_url.netloc - '127.0.0.1:5000'
+        # parsed_url = urlparse('http://127.0.0.1:1000/')
+        # parsed_url.netloc - '127.0.0.1:1000'
         parsed_url = urlparse(address)
         self.nodes.add(parsed_url.netloc)
         
@@ -127,37 +128,35 @@ class Blockchain:
 app = Flask(__name__)
 
 
-# Creating an address for the node on the port 5000
-# uuid4() creates a random universally unique identifier (UUID - generated using synchronization methods that ensure no two processes can obtain the same UUID)
+# Creating a port 1000 address for the node.
+# uuid4() generates a globally unique identifier at random (UUID - generated using synchronization methods that ensure no two processes can obtain the same UUID)
 node_address = str(uuid4()).replace('-', '')
 
-# Creating a blockchain
+# Putting together a blockchain
 blockchain=Blockchain()
 
 # Mining a block
 @app.route('/mine_block', methods = ['GET'])
 def mine_block():
     """
-    we need previous block and its proof
-    calculate the current proof
-    create the current block with that proof and prev hash
+We'll use the previous block's proof to compute the new proof and build the current block using that proof and the prior hash.
     """ 
     previous_block = blockchain.get_previous_block()
     previous_proof = previous_block['proof']
     proof = blockchain.proof_of_work(previous_proof)
     previous_hash = blockchain.hash(previous_block)
-    # if we mine a block we can reward the bcoin. Receiver can be set who mines the block
+    # We may award the bcoin if we mine a block. The miner who receives the block can be chosen.
     blockchain.add_transaction(sender = node_address, receiver = 'Bharathi', amount = 1)
     block = blockchain.create_block(proof, previous_hash)
     
     # Return the response
-    response = {'message' : 'Congrats, you just mined a block!',
+    response = {'message' : 'You ve just mined a block, congrats!',
                 'index' : block['index'],
                 'timestamp' : block['timestamp'],
                 'proof' : block['proof'],
                 'previous_hash' : block['previous_hash'],
                 'transactions' : block['transactions']}
-    # Response with the JSON representation of the given arguments with an application/json mimetype(Multipurpose Internet Mail Extensions or MIME type).
+    # With an application/json mimetype, return a JSON representation of the supplied parameters (Multipurpose Internet Mail Extensions or MIME type).
     return jsonify(response), 200
     
 # Getting the blockchain
@@ -173,26 +172,26 @@ def get_chain():
 def is_valid():
     is_valid = blockchain.is_chain_valid(blockchain.chain)
     if is_valid:
-        response = {'message': 'All good. The Blockchain is valid.'}
+        response = {'message': 'Everything is fine. The Blockchain is correct..'}
     else:
-        response = {'message': 'We have a problem. The Blockchain is not valid.'}
+        response = {'message': 'Weve got an issue. The Blockchain isnt trustworthy..'}
     return jsonify(response), 200
 
 # Adding a new transaction to the blockchain
 @app.route('/add_transaction', methods = ['POST'])
 def add_transaction():
-    # we are giving the transactions in the json format in the postman so we will get it in the json format
+    # We're sending the transactions to Postman in json format, thus we'll get them back in json format.
     json = request.get_json()
     # checking if it contains all of the keys
     transaction_keys = ['sender', 'receiver', 'amount']
     if not all(key in json for key in transaction_keys):
         return 'Some elements of the transactions are missing', 400
-    # if it contains all of the elements we will add the transaction and return the response as added
+    # We will add the transaction and return the answer as added if it has all of the components.
     index = blockchain.add_transaction(json['sender'],json['receiver'],json['amount'])
-    response = {'message' : f'This transaction will be added to the Block {index}'}
+    response = {'message' : fThis transaction will be added to the Block {index}'}
     return jsonify(response), 201
 
-# Decentralizing our blockchain
+# Our blockchain is becoming more decentralized.
 
 #Connecting new nodes
 @app.route('/connect_node', methods = ['POST'])
@@ -200,15 +199,15 @@ def connect_node():
     # connecting all of the others nodes manually 
     json = request.get_json()
     nodes = json.get('nodes')
-    # return none if node feild is null
+    # return none if node field is null
     if nodes is None:
         return 'No node', 400
-    # we will add the nodes manually. This is done for all the nodes.
-    # Our nodes is a set so even if it is done for all the nodes seperately it will contain only unique values
+# We'll manually add the nodes. This is repeated for each node.
+# Because our nodes are a set, it will only include unique values if done separately for each node.
     for node in nodes:
         blockchain.add_node(node)
-    # give the response as all connected and display the nodes
-    response = {'message' : 'All the nodes are now connected. The Bcoin blockchain now contains the node',
+    # show the nodes and mark the answer as all connected
+    response = {'message' : 'All of the nodes are now linked together. The node has now been added to the Bitcoin blockchain.',
                 'total_nodes' : list(blockchain.nodes)}
     # http 201 created
     return jsonify(response), 201
@@ -216,24 +215,15 @@ def connect_node():
 # Replacing the chain by the longest chain
 @app.route('/replace_chain', methods = ['GET'])
 def replace_chain():
-    # if any chain is larger then we will replace the chain by the longest chain or else display the same chain
+    # If any chain is longer, the longest chain will be displayed instead, otherwise the same chain will be displayed.
     is_chain_replaced = blockchain.replace_chain()
     if is_chain_replaced:
-        response = {'message': 'The nodes are different so the chain is replaced by the longest chain.',
+        response = {'message': 'Because the nodes are different, the longest chain is used to replace the chain..',
                     'new_chain' : blockchain.chain}
     else:
-        response = {'message': 'All good. The chain is the largest one',
+        response = {'message': 'Everything is fine. The chain is the most extensive.',
                     'new_chain' : blockchain.chain}
     return jsonify(response), 200
 
 # Running the app on the port
-app.run(host = '0.0.0.0', port = 5001)
-
-
-    
-    
-    
-    
-    
-    
-    
+app.run(host = '0.0.0.0', port = 1001)
