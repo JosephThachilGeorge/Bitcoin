@@ -5,7 +5,6 @@ from flask import Flask,jsonify,request
 import requests
 from uuid import uuid4
 from urllib.parse import urlparse
-# This is the Python class for Blockchain
 class Blockchain:
     def __init__(self):
         self.chain=[]
@@ -114,14 +113,14 @@ def mine_block():
                 'transactions' : block['transactions']}
     return jsonify(response), 200
 
-#Get method for belockchain 
+#Get method for blockchain 
 @app.route('/get_chain', methods = ['GET'])
 def get_chain():
     response = {'chain' : blockchain.chain,
                 'length' : len(blockchain.chain)}
     return jsonify(response), 200
 
- #Validate method for belockchain 
+ #Validate method for blockchain 
     
 @app.route('/is_valid', methods = ['GET'])
 def is_valid():
@@ -129,10 +128,10 @@ def is_valid():
     if is_valid:
         response = {'message': 'Everything is fine. The Blockchain is correct.'}
     else:
-        response = {'message': 'We've got an issue. The Blockchain isn't trustworthy..'}
+        response = {'message': 'Weve got an issue. The Blockchain isnt trustworthy..'}
     return jsonify(response), 200
 
- #POST method for belockchain 
+ #POST method for blockchain 
 
 @app.route('/add_transaction', methods = ['POST'])
 def add_transaction():
@@ -141,7 +140,7 @@ def add_transaction():
     if not all(key in json for key in transaction_keys):
         return 'Some transactional components are missing.', 400
     index = blockchain.add_transaction(json['sender'],json['receiver'],json['amount'])
-    response = {'message' : f'This transaction will be added to the Block {index}'}
+    response = {'message' : This transaction will be added to the Block {index}'}
     return jsonify(response), 201
 
  #Connect to the node
@@ -155,7 +154,7 @@ def connect_node():
         return 'No node', 400
     for node in nodes:
         blockchain.add_node(node)
-    response = {'message' : 'All of the nodes are now linked together. The node has now been added to the Bcoin blockchain',
+    response = {'message' : 'All of the nodes are now linked together. The node has now been added to the Bitcoin blockchain',
                 'total_nodes' : list(blockchain.nodes)}
     return jsonify(response), 201
 
@@ -173,9 +172,10 @@ def replace_chain():
                     'new_chain' : blockchain.chain}
     return jsonify(response), 200
 
-app.run(host = '0.0.0.0', port = 5001)
+app.run(host = '0.0.0.0', port = 1001)
 
-    
+
+
     
     
     
