@@ -101,10 +101,10 @@ def mine_block():
     previous_proof = previous_block['proof']
     proof = blockchain.proof_of_work(previous_proof)
     previous_hash = blockchain.hash(previous_block)
-    blockchain.add_transaction(sender = node_address, receiver = 'Bharathi', amount = 1)
+    blockchain.add_transaction(sender = node_address, receiver = 'Meghna', amount = 1)
     block = blockchain.create_block(proof, previous_hash)
     
-    response = {'message' : 'Congrats, you just mined a block!',
+    response = {'message' : 'Youve just mined a block, so congrats!',
                 'index' : block['index'],
                 'timestamp' : block['timestamp'],
                 'proof' : block['proof'],
@@ -122,9 +122,9 @@ def get_chain():
 def is_valid():
     is_valid = blockchain.is_chain_valid(blockchain.chain)
     if is_valid:
-        response = {'message': 'All good. The Blockchain is valid.'}
+        response = {'message': 'Everything is fine. The Blockchain is correct..'}
     else:
-        response = {'message': 'We have a problem. The Blockchain is not valid.'}
+        response = {'message': 'We ve got an issue. The Blockchain isnt trustworthy..'}
     return jsonify(response), 200
 
 @app.route('/add_transaction', methods = ['POST'])
@@ -132,7 +132,7 @@ def add_transaction():
     json = request.get_json()
     transaction_keys = ['sender', 'receiver', 'amount']
     if not all(key in json for key in transaction_keys):
-        return 'Some elements of the transactions are missing', 400
+        return 'Some transactional components are missing.', 400
     index = blockchain.add_transaction(json['sender'],json['receiver'],json['amount'])
     response = {'message' : f'This transaction will be added to the Block {index}'}
     return jsonify(response), 201
@@ -145,7 +145,7 @@ def connect_node():
         return 'No node', 400
     for node in nodes:
         blockchain.add_node(node)
-    response = {'message' : 'All the nodes are now connected. The Bcoin blockchain now contains the node',
+    response = {'message' : 'All of the nodes are now linked together. The node has now been added to the Bcoin blockchain.',
                 'total_nodes' : list(blockchain.nodes)}
     return jsonify(response), 201
 
@@ -153,10 +153,10 @@ def connect_node():
 def replace_chain():
     is_chain_replaced = blockchain.replace_chain()
     if is_chain_replaced:
-        response = {'message': 'The nodes are different so the chain is replaced by the longest chain.',
+        response = {'message': 'Because the nodes are different, the longest chain is used to replace the chain..',
                     'new_chain' : blockchain.chain}
     else:
-        response = {'message': 'All good. The chain is the largest one',
+        response = {'message': 'Everything seems to be fine. It is the most extensive chain.',
                     'new_chain' : blockchain.chain}
     return jsonify(response), 200
 
